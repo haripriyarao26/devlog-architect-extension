@@ -1,13 +1,14 @@
 import * as vscode from "vscode";
-import { getApiKey } from "./apiKey";
+import { API_KEY_ENV_HINT, getApiKey } from "./apiKey";
 
 export type ChatMessage = {
   role: "system" | "user" | "assistant";
   content: string;
 };
 
+let missingKeyNotified = false;
+
 export async function createChatCompletion(
-  context: vscode.ExtensionContext,
   messages: ChatMessage[],
   temperature = 0.4
 ): Promise<{ ok: true; content: string } | { ok: false; error: string }> {
@@ -20,8 +21,12 @@ export async function createChatCompletion(
     return { ok: false, error: "skipLlm" };
   }
 
-  const apiKey = await getApiKey(context);
+  const apiKey = getApiKey();
   if (!apiKey) {
+    if (!missingKeyNotified) {
+      missingKeyNotified = true;
+      void vscode.window.showWarningMessage(API_KEY_ENV_HINT);
+    }
     return { ok: false, error: "noApiKey" };
   }
 

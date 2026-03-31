@@ -5,10 +5,7 @@ import type { CommitBundle } from "./git";
 
 export { getApiKey } from "./apiKey";
 
-export async function generateCaseStudyMarkdown(
-  context: vscode.ExtensionContext,
-  commits: CommitBundle[]
-): Promise<string> {
+export async function generateCaseStudyMarkdown(commits: CommitBundle[]): Promise<string> {
   const config = vscode.workspace.getConfiguration("devlogArchitect");
   const maxDiffChars = config.get<number>("maxDiffChars") ?? 120000;
   const skipLlm = config.get<boolean>("skipLlm") === true;
@@ -19,7 +16,7 @@ export async function generateCaseStudyMarkdown(
     return fallbackTemplate(commits, truncated);
   }
 
-  const result = await createChatCompletion(context, [
+  const result = await createChatCompletion([
     { role: "system", content: CASE_STUDY_SYSTEM },
     { role: "user", content: userPromptForCaseStudy({ commits: bundled }) },
   ]);
@@ -72,7 +69,7 @@ function truncateCommitsDiff(
 
 function fallbackTemplate(commits: CommitBundle[], truncated: boolean): string {
   const note = truncated
-    ? "_Diffs truncated in this export; increase `devlogArchitect.maxDiffChars` or add an API key for full LLM context._\n\n"
+    ? "_Diffs truncated in this export; increase `devlogArchitect.maxDiffChars` or set `DEVLOG_OPENAI_API_KEY` / `OPENAI_API_KEY` for full LLM context._\n\n"
     : "";
 
   const timeline = commits
@@ -92,7 +89,7 @@ function fallbackTemplate(commits: CommitBundle[], truncated: boolean): string {
 
 ## Summary
 
-_Add an OpenAI-compatible API key via the Dev-Log export command to generate an LLM case study. Until then, this template includes your recent commits and raw diffs._
+_Set DEVLOG_OPENAI_API_KEY or OPENAI_API_KEY in your environment (then restart the editor) to generate an LLM case study. This extension does not supply keys. Until then, this template includes your recent commits and raw diffs._
 
 ## Timeline
 

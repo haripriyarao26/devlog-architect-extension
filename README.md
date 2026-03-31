@@ -8,32 +8,32 @@ A VS Code / Cursor extension that turns **recent git history** into **portfolio-
 |--------|----------------|
 | **Dev-Log: Export Case Study (last 3 commits)** (`devlog.export`) | Reads the **last 3 commits** from the workspace git repo, collects each commit’s **full diff**, then either calls an **OpenAI-compatible** chat API to draft a case study or emits a **structured template** with raw diffs. |
 
-### LLM setup
+### API keys (yours only—never ours)
 
-1. Run **Dev-Log: Export Case Study** from the Command Palette.
-2. On first use, enter an API key when prompted (stored in [Secret Storage](https://code.visualstudio.com/api/references/vscode-api#SecretStorage)), **unless** an API key is already available from the environment (see below).
-3. Or set **`devlogArchitect.skipLlm`: `true`** in Settings to always export the template (no key, no network).
+**Dev-Log Architect does not provide, prompt for, collect, or store API keys.** There is no key input dialog and no Secret Storage for credentials. You must bring **your own** key from **your** provider account, via **your** machine environment.
 
-### Environment variables (user / machine)
+To enable LLM-powered exports:
 
-**None are required.** LLM features are off or use templates when no key is available and `skipLlm` is enabled.
+1. Set an environment variable before starting VS Code / Cursor (see table below).
+2. **Fully quit and restart** the editor so the Extension Host picks up `process.env`.
 
-| Variable | Required | Purpose |
-|----------|----------|---------|
-| `DEVLOG_OPENAI_API_KEY` | No | OpenAI-compatible **API key** for this extension. If set in the environment of the VS Code / Cursor process, the extension uses it and skips the key prompt (nothing is written to Secret Storage from this variable alone). |
-| `OPENAI_API_KEY` | No | **Fallback** key if `DEVLOG_OPENAI_API_KEY` is unset and no key is stored in Secret Storage. Useful if you already export this for other tools. |
+| Variable | When to use |
+|----------|-------------|
+| **`DEVLOG_OPENAI_API_KEY`** | Preferred. Your OpenAI-compatible API key for this extension. |
+| **`OPENAI_API_KEY`** | Optional fallback if `DEVLOG_OPENAI_API_KEY` is unset (common if you already use this for other tools). |
 
-**Resolution order:** Secret Storage (saved key from the prompt) → `DEVLOG_OPENAI_API_KEY` → `OPENAI_API_KEY` → prompt.
+**Resolution order:** `DEVLOG_OPENAI_API_KEY` → `OPENAI_API_KEY`. If neither is set, LLM commands fall back to templates / placeholders and show a one-time reminder in the UI.
 
-**How to set them:** Extensions inherit `process.env` from the editor. Typical approaches:
+**Template-only mode:** set **`devlogArchitect.skipLlm`: `true`** in Settings to skip all LLM calls (no key, no network).
 
-- Launch the editor from a terminal where the variable is exported, e.g. `export DEVLOG_OPENAI_API_KEY=sk-...` then `code .` or `cursor .`.
-- On macOS/Linux, define the variable in the shell profile or in the plist/launch agent that starts the app (if you start the GUI without a shell).
-- In team docs, prefer **Secret Storage** or a personal env file that is **not** committed; never commit API keys.
+**How to set env vars:** Extensions see the same `process.env` as the app. Examples:
 
-**Not environment variables (but you need them on your machine):**
+- `export DEVLOG_OPENAI_API_KEY='…'` then `code .` or `cursor .` from that shell.
+- macOS GUI launches: configure env in your shell profile, wrapper script, or OS-level launch environment—never commit keys or `.env` files into a repo.
 
-- **`git`** on your `PATH` for **Dev-Log: Export Case Study (last 3 commits)** (`devlog.export`). The extension runs `git` in your workspace folder.
+**Not environment variables (but required on your machine for some commands):**
+
+- **`git`** on your `PATH` for **Dev-Log: Export Case Study (last 3 commits)** (`devlog.export`).
 
 Additional settings:
 

@@ -18,7 +18,7 @@ import {
  * 3. LLM: Mermaid sequenceDiagram from User to Database.
  * 4. Writes Markdown with clean headers to the workspace root.
  */
-async function generateCaseStudy(context: vscode.ExtensionContext): Promise<void> {
+async function generateCaseStudy(): Promise<void> {
   const editor = vscode.window.activeTextEditor;
   if (!editor) {
     vscode.window.showErrorMessage("Dev-Log: open a source file in the active editor.");
@@ -66,7 +66,6 @@ async function generateCaseStudy(context: vscode.ExtensionContext): Promise<void
     ].join("\n");
   } else {
     const tradeResult = await createChatCompletion(
-      context,
       [
         { role: "system", content: FILE_TRADEOFF_SYSTEM },
         { role: "user", content: userPromptFileTradeoff(filePath, imports, snippet) },
@@ -75,11 +74,13 @@ async function generateCaseStudy(context: vscode.ExtensionContext): Promise<void
     );
 
     if (!tradeResult.ok) {
-      vscode.window.showWarningMessage(
-        `Dev-Log: trade-off generation skipped (${tradeResult.error}). Using placeholders.`
-      );
+      if (tradeResult.error !== "noApiKey" && tradeResult.error !== "skipLlm") {
+        vscode.window.showWarningMessage(
+          `Dev-Log: trade-off generation skipped (${tradeResult.error}). Using placeholders.`
+        );
+      }
       tradeoffBody =
-        "_Could not generate trade-offs. Check API key, network, or disable `skipLlm` after configuring._\n\n";
+        "_Could not generate trade-offs. Set `DEVLOG_OPENAI_API_KEY` or `OPENAI_API_KEY`, restart the editor, or enable `devlogArchitect.skipLlm` for placeholders only._\n\n";
       const impList =
         imports.length > 0
           ? imports.map((i) => `- \`${i}\``).join("\n")
@@ -90,7 +91,6 @@ async function generateCaseStudy(context: vscode.ExtensionContext): Promise<void
     }
 
     const seqResult = await createChatCompletion(
-      context,
       [
         { role: "system", content: FILE_SEQUENCE_SYSTEM },
         { role: "user", content: userPromptFileSequence(filePath, imports, snippet) },
@@ -99,9 +99,11 @@ async function generateCaseStudy(context: vscode.ExtensionContext): Promise<void
     );
 
     if (!seqResult.ok) {
-      vscode.window.showWarningMessage(
-        `Dev-Log: sequence diagram skipped (${seqResult.error}). Using placeholder diagram.`
-      );
+      if (seqResult.error !== "noApiKey" && seqResult.error !== "skipLlm") {
+        vscode.window.showWarningMessage(
+          `Dev-Log: sequence diagram skipped (${seqResult.error}). Using placeholder diagram.`
+        );
+      }
       sequenceDiagram = [
         "sequenceDiagram",
         "    actor User",
@@ -190,7 +192,7 @@ export function activate(context: vscode.ExtensionContext): void {
           return;
         }
 
-        const md = await generateCaseStudyMarkdown(context, commits);
+        const md = await generateCaseStudyMarkdown(commits);
         const doc = await vscode.workspace.openTextDocument({
           content: md,
           language: "markdown",
@@ -220,7 +222,7 @@ export function activate(context: vscode.ExtensionContext): void {
           cancellable: false,
         },
         async () => {
-          await generateCaseStudy(context);
+          await generateCaseStudy();
         }
       );
     }

@@ -47,7 +47,7 @@
         "devlogArchitect.skipLlm": {
           "type": "boolean",
           "default": false,
-          "description": "If true, export a Markdown template with raw diffs only (no API key prompt)."
+          "description": "If true, skip all LLM calls (templates only). API keys are never supplied by the extension—use DEVLOG_OPENAI_API_KEY or OPENAI_API_KEY in your environment when this is false."
         },
         "devlogArchitect.maxFileSnippetChars": {
           "type": "number",

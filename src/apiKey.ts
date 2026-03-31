@@ -1,32 +1,18 @@
-import * as vscode from "vscode";
+/**
+ * Shown once per extension host session when an LLM call is attempted without a key.
+ * Dev-Log Architect never collects, stores, or ships API keys—only reads from your environment.
+ */
+export const API_KEY_ENV_HINT =
+  "Dev-Log Architect: Set DEVLOG_OPENAI_API_KEY or OPENAI_API_KEY in your own environment, then fully quit and restart the editor. This extension never provides, prompts for, or stores API keys.";
 
-const SECRET_KEY = "devlog.openaiCompatibleApiKey";
-
-function keyFromEnv(): string | undefined {
-  const a = process.env.DEVLOG_OPENAI_API_KEY?.trim();
-  if (a) {
-    return a;
+/**
+ * OpenAI-compatible API key from the user's environment only.
+ */
+export function getApiKey(): string | undefined {
+  const primary = process.env.DEVLOG_OPENAI_API_KEY?.trim();
+  if (primary) {
+    return primary;
   }
-  const b = process.env.OPENAI_API_KEY?.trim();
-  return b || undefined;
-}
-
-export async function getApiKey(context: vscode.ExtensionContext): Promise<string | undefined> {
-  let key = await context.secrets.get(SECRET_KEY);
-  if (!key) {
-    key = keyFromEnv();
-  }
-  if (!key) {
-    key = await vscode.window.showInputBox({
-      title: "Dev-Log Architect — API key",
-      prompt:
-        "OpenAI-compatible API key (stored in Secret Storage). Leave empty for template-only export.",
-      password: true,
-      ignoreFocusOut: true,
-    });
-    if (key) {
-      await context.secrets.store(SECRET_KEY, key);
-    }
-  }
-  return key?.trim() || undefined;
+  const fallback = process.env.OPENAI_API_KEY?.trim();
+  return fallback || undefined;
 }
