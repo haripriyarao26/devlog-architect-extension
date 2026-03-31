@@ -61,6 +61,7 @@
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
+    "test": "npm run compile && node --test out/imports.test.js",
     "lint": "eslint src --ext ts"
   },
   "devDependencies": {

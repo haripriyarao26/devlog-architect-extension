@@ -6,3 +6,5 @@ src/**
 **/*.map
 **/.eslintrc.json
 node_modules/**
+out/**/*.test.js
+examples/**
