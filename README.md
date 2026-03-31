@@ -85,6 +85,8 @@ That pairing is usually enough for **install-worthy** diagrams; tune the system 
 
 ## Development
 
+**_Git:_** `main` is the default branch. Use short-lived `feature/<topic>` branches for small changes, merge into `main` via PR, then delete the feature branch.
+
 Prerequisites: Node.js 18+, npm, and [Yeoman `yo code`](https://code.visualstudio.com/api/get-started/your-first-extension) if you prefer the official generator (this repo is already scaffolded as a TypeScript extension).
 
 ```bash
@@ -92,7 +94,36 @@ npm install
 npm run compile
 ```
 
-Press **F5** in VS Code / Cursor ( **Run Extension** ) to launch an Extension Development Host. Open a folder with git history, run **Dev-Log: Export Case Study**.
+### Testing in the Extension Development Host (“sandbox”)
+
+VS Code and Cursor ship an **[Extension Development Host](https://code.visualstudio.com/api/get-started/your-first-extension#run-the-extension)**—a second window with your in-development extension pre-loaded, without publishing it. That avoids the “inception” mess of piling test files on top of the extension repo.
+
+**1. Launch the sandbox**  
+In this repository, press **F5** (or **Run and Debug** → run **Run Extension**). A new window opens; the title bar includes **`[Extension Development Host]`**. That instance is where you act as the end user.
+
+**2. Open a separate mini-project**  
+In the **sandbox** window, use **File → Open Folder…** and choose or create an empty folder elsewhere (e.g. `~/Desktop/test-auth-feature`). Keep extension **source** in your main window; keep **fixture code** only in this folder.
+
+Add something like a `login.ts` with imports you care about (e.g. `@supabase/supabase-js`, `bcrypt`, `zod`) and save. For **`Dev-Log: Export Case Study (last 3 commits)`**, that folder must be a **git** repo with commits; run `git init`, commit, then use the command.
+
+**3. Run the real commands (MVP today)**  
+Use the Command Palette (**Cmd+Shift+P** / **Ctrl+Shift+P**):
+
+| Command | What to verify |
+|--------|----------------|
+| **Dev-Log: Generate Case Study from Active File** | Writes **`devlog_entry.md`** at the **root of the opened folder**. Check **Tech stack (import specifiers)**, **Technical trade-offs**, and the **Mermaid** block in **Data flow**. With `DEVLOG_OPENAI_API_KEY` or `OPENAI_API_KEY` set in the environment **before** starting the editor, the model can reason about bcrypt vs alternatives; with `devlogArchitect.skipLlm` you get placeholders only. |
+| **Dev-Log: Export Case Study (last 3 commits)** | Needs **git** history in that folder; produces a case-study Markdown document (save dialog). |
+
+There is **no** “Capture Milestone” command yet—that name maps to a future “Save Milestone” flow. **Interview / “Bar Raiser” sidebar prompts** are **not implemented** in this MVP; you get notifications mainly for missing env keys or LLM errors. To stress-test judgment, try **deliberately weak code** (e.g. plaintext passwords) and see whether the **Technical trade-offs** section (when the LLM is enabled) calls out the risk.
+
+**4. Tighten the loop**  
+If behavior is wrong, edit prompts (`src/prompts.ts`) or logic in the **main** window, then use the debug toolbar **Restart** (or restart the Extension Development Host). The sandbox reloads your extension **without** reinstalling—close to how users will run it.
+
+**Why this pattern works:** fixture code stays outside the extension tree; failures show in the **original** window’s **Debug Console**; UX friction (too many steps before value) shows up immediately.
+
+```bash
+npm run test   # unit tests for import extraction (not full E2E)
+```
 
 Package locally:
 
