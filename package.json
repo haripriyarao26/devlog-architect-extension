@@ -4,6 +4,10 @@
   "description": "Extract context from your coding sessions—case studies, trade-offs, and interview prep from real git history.",
   "version": "0.1.0",
   "publisher": "devlog-architect",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/haripriyarao26/devlog-architect-extension.git"
+  },
   "engines": {
     "vscode": "^1.85.0"
   },
@@ -62,6 +66,7 @@
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "test": "npm run compile && node --test out/imports.test.js",
+    "package": "npm run compile && npx --yes @vscode/vsce package",
     "lint": "eslint src --ext ts"
   },
   "devDependencies": {

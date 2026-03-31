@@ -2,6 +2,32 @@
 
 A VS Code / Cursor extension that turns **recent git history** into **portfolio-ready Markdown**: timelines, conflict-and-resolution narrative, **technical trade-offs**, and interview hooks. The goal is **context extraction**—so six months later (or in a staff interview) you still remember *why* the code looks the way it does.
 
+## Distribution: GitHub first (before the Marketplace)
+
+Until you click **Publish** on the [Visual Studio Marketplace](https://marketplace.visualstudio.com/vscode) (or [Open VSX](https://open-vsx.org/)), **this GitHub repository is your storefront**: the README is the landing page, Issues are feedback, and **Releases** are how people install a real build.
+
+### The VSIX + GitHub Releases flow
+
+1. From this repo, produce a VSIX (Visual Studio extension package):
+
+   ```bash
+   npm run package
+   ```
+
+   That runs `vsce package` and writes something like `devlog-architect-0.1.0.vsix` in the project root (the file is gitignored so you don’t commit binaries by accident).
+
+2. On GitHub: **Releases** → **Draft a new release** → choose a tag (e.g. `v0.1.0`) → **Attach** the `.vsix` as a release asset.
+
+3. **Install for testers:** In VS Code or Cursor: **Extensions** → `⋯` → **Install from VSIX…** → pick the downloaded file.
+
+### How to talk about it (resume / interviews)
+
+Saying *“I’m still testing it”* undersells the work. A tighter line:
+
+> **Private beta** — distributed via **VSIX builds on GitHub Releases** for **internal dogfooding and QA**, ahead of a public Marketplace listing.
+
+That reads as shipping discipline, not “not done yet.”
+
 ## One-day MVP (shipped here)
 
 | Command | What it does |
@@ -125,10 +151,10 @@ If behavior is wrong, edit prompts (`src/prompts.ts`) or logic in the **main** w
 npm run test   # unit tests for import extraction (not full E2E)
 ```
 
-Package locally:
+Package a VSIX (same as `npm run package`):
 
 ```bash
-npx @vscode/vsce package
+npm run package
 ```
 
 ---
